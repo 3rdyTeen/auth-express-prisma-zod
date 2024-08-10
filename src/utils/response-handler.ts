@@ -21,6 +21,25 @@ export const sendSuccessResponse = <T>(
   return res.status(status).json({ success: true, data });
 };
 
+// Success response with data and cookie (e.g., for login/ signup)
+export const sendSuccessResponseWithCookie = <T>(
+  res: Response,
+  token: string,
+  data: T,
+  status = 200
+): Response<SuccessResponse<T>> => {
+  const oneDay: number = 1000 * 60 * 60 * 24;
+
+  res.cookie('token', token, {
+    expires: new Date(Date.now() + oneDay),
+    secure: process.env.APP_PORT === 'production',
+    signed: true,
+    sameSite: 'strict',
+    httpOnly: true,
+  });
+  return res.status(status).json({ success: true, data });
+};
+
 // Success response without data (e.g., for delete operations)
 export const sendSuccessNoDataResponse = (
   res: Response,

@@ -6,7 +6,7 @@ import {
   sendBadRequestResponse,
   sendErrorResponse,
   sendSuccessNoDataResponse,
-  sendSuccessResponse,
+  sendSuccessResponseWithCookie,
   sendUnauthorizedResponse,
 } from '@/utils/response-handler';
 import bcrypt from 'bcryptjs';
@@ -42,15 +42,6 @@ export const login = async (req: Request, res: Response) => {
       return sendUnauthorizedResponse(res, 'Invalid Credentials.');
 
     const token: string = generateJWT({ id: user.id }, '30d');
-    const oneDay: number = 1000 * 60 * 60 * 24;
-
-    res.cookie('jwt', token, {
-      expires: new Date(Date.now() + oneDay),
-      secure: process.env.APP_PORT === 'production',
-      signed: true,
-      sameSite: 'strict',
-      httpOnly: true,
-    });
 
     const responseData = {
       id: user.id,
@@ -60,7 +51,7 @@ export const login = async (req: Request, res: Response) => {
       status: user.status,
     };
 
-    return sendSuccessResponse(res, responseData);
+    return sendSuccessResponseWithCookie(res, token, responseData);
   } catch (error) {
     return sendErrorResponse(res, error);
   }
